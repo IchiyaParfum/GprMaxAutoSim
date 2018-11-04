@@ -12,11 +12,13 @@ public class InputFileConfig {
 	private int iterations;
 	private double[] parameters;
 	
+	public InputFileConfig() throws InvalidParameterException {
+		this(0, null);
+	}
+	
 	public InputFileConfig(int iterations, double[] parameters) throws InvalidParameterException{
-		if(parameters == null || parameters.length != 11) {
-			throw new InvalidParameterException();
-		}
-		this.iterations = iterations;
+		this.parameters = parameters;
+		this.setIterations(iterations);
 		this.parameters = parameters;
 	}
 	
@@ -61,5 +63,13 @@ public class InputFileConfig {
 	@Override
 	public String toString() {
 		return (getMaterial() + "\n" + getCylinder());
+	}
+
+	public int getIterations() {
+		return iterations;
+	}
+
+	public void setIterations(int iterations) {
+		this.iterations = iterations;
 	}
 }
