@@ -1,7 +1,6 @@
 package autoSim;
 
 import java.io.File;
-import java.io.IOException;
 
 public class BScanExecuter implements Runnable, Constants{
 	private ThreadListener owner;
@@ -22,18 +21,36 @@ public class BScanExecuter implements Runnable, Constants{
 		this.owner = owner;
 	}
 	
+	@Override
 	public void run() {
-		try {
-			//Try to execute BScan
-			Runtime.getRuntime().exec(exeBScan + dir.getPath() + filename + ".in" + " -n " + iterations);
-			//Try to merge output files from bscan
-			Runtime.getRuntime().exec(exeMerge + dir.getPath() + filename + ".out");
-		} catch (IOException e) {
-			//Tell owner that operation failed
-			owner.threadFinished(new ThreadState(e.getMessage(), false));
-			e.printStackTrace();
-		}
-		owner.threadFinished(new ThreadState("", true));	//Tell owner that operation succeded
+		 try{			 
+			 //Try to execute BScan
+			 String command = exeBScan + " " + dir.getAbsolutePath() + "\\" + filename + ".in" + " -n " + iterations;
+		 	Process proc = Runtime.getRuntime().exec(command);
+		 	StreamExhauster in = new StreamExhauster(proc.getInputStream(), 256);
+		 	StreamExhauster err = new StreamExhauster(proc.getErrorStream(), 256);
+		 	new Thread(in).start();
+		 	new Thread(err).start();
+		 	proc.waitFor();
+		 	in.finish();
+		 	err.finish();
+		 	
+			//Try to merge BScans
+		 	command = exeMerge + " " + dir.getAbsolutePath() + "\\" + filename + " --remove";
+		 	proc = Runtime.getRuntime().exec(command);
+		 	in = new StreamExhauster(proc.getInputStream(), 256);
+		 	err = new StreamExhauster(proc.getErrorStream(), 256);
+		 	new Thread(in).start();
+		 	new Thread(err).start();
+		 	proc.waitFor();
+		 	in.finish();
+		 	err.finish();
+		 	
+		 	owner.threadFinished(new ThreadState("", true));	//Tell owner that operation succeded
+	        } catch (Throwable t){
+	        	owner.threadFinished(new ThreadState(t.getMessage(), false));	//Tell owner that operation failed
+	            t.printStackTrace();
+	        }		
 	}
 	
 }
