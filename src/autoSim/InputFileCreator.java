@@ -23,11 +23,13 @@ public class InputFileCreator implements Runnable, ThreadListener, Constants{
 		this.filename = filename;
 	}
 	
+	@Override
 	public synchronized void threadFinished(ThreadState state) {
 		//synchronized => To ensure thread safety during access on thread array
 		//TODO
 	}
 
+	@Override
 	public void run() {
 		//Create new directory to store files in (<filename>_yyyy-MM-dd_HH-mm)
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm");
@@ -47,10 +49,11 @@ public class InputFileCreator implements Runnable, ThreadListener, Constants{
 			        String line;
 			        while((line = br.readLine()) != null) {
 			        	wr.write(line);
+			        	wr.write("\n");
 			        }
 					
 				    //Append config
-				    wr.write(config.toString());
+				    wr.write(c.toString());
 			        
 			        //Close streams
 			        br.close();
