@@ -7,7 +7,7 @@ package autoSim;
  *
  */
 public class InputFileConfig {
-	public final static int nOfParam = 11;	//4 for material, 7 for cylinder
+	public final static int nOfParam = 11;	//4 for material, 7 for cylinder, 1 for target density
 	private final String ws = " ";
 	private int iterations;
 	private double[] parameters;
@@ -17,9 +17,13 @@ public class InputFileConfig {
 	}
 	
 	public InputFileConfig(int iterations, double[] parameters) throws InvalidParameterException{
-		this.parameters = parameters;
-		this.setIterations(iterations);
-		this.parameters = parameters;
+		if(parameters != null && parameters.length == nOfParam) {
+			this.parameters = parameters;
+			this.setIterations(iterations);
+			this.parameters = parameters;
+		}else {
+			throw new InvalidParameterException();
+		}
 	}
 	
 	/**Puts the parameters together to a valid material command
@@ -43,7 +47,7 @@ public class InputFileConfig {
 	/**Puts the parameters together to a valid cylinder command
 	 * 
 	 * #cylinder: f1 f2 f3 f4 f5 f6 f7 str1 [c1]
-	 * f1 f2 f3 are the coordinates (x,y,z) of the centre of one face of the cylinder, and f4 f5 f6 are the coordinates (x,y,z) of the centre of the other face.
+	 * f1 f2 f3 are the coordinates (x,y,z) in metres of the centre of one face of the cylinder, and f4 f5 f6 are the coordinates (x,y,z) in metres of the centre of the other face.
 	 * f7 is the radius of the cylinder.
 	 * str1 is a material identifier that must correspond to material that has already been defined in the input file, or is one of the builtin materials pec or free_space.
 	 */
@@ -57,7 +61,6 @@ public class InputFileConfig {
 				parameters[9] + ws +
 				parameters[10] + ws +
 				"myCyl";
-		
 	};
 	
 	@Override
