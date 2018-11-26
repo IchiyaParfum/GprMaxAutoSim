@@ -35,40 +35,45 @@ public class GprMaxAutoSim implements ThreadListener, Constants{
 	}
 	
 	private void readFilenamesFromConfig() throws IOException{
-		File file = new File(workingDir + config); 
-		BufferedReader br = new BufferedReader(new FileReader(file));
-		
-		
-		//Read filenames from file
-		String st;
+		File file = new File(simDir + configFile); 
+		if(file.exists()) {
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			
+			
+			//Read filenames from file
+			String st;
 
-		while ((st = br.readLine()) != null) {
-			if(st.matches("\\w+\\s+\\d+")) {
-				//Setup scanner
-				Scanner scanner = new Scanner(st);	
-				scanner.useDelimiter(" ");
-				
-				//Ensure that name only exists once
-				String name = scanner.next();
-				if(!configs.containsKey(name)) {
-					configs.put(name, scanner.nextInt());
-				}
-				scanner.close();
-			}				
+			while ((st = br.readLine()) != null) {
+				if(st.matches("\\w+\\s+\\d+")) {
+					//Setup scanner
+					Scanner scanner = new Scanner(st);	
+					scanner.useDelimiter(" ");
+					
+					//Ensure that name only exists once
+					String name = scanner.next();
+					if(!configs.containsKey(name)) {
+						configs.put(name, scanner.nextInt());
+					}
+					scanner.close();
+				}				
+			}
+			
+			br.close();
+		}else {
+			throw new IOException("There has to be a config file at: " + file.getAbsolutePath());
 		}
 		
-		br.close();
 	}	
 	
 	private void createInputFileCreators() throws InvalidParameterException, IOException{
 		BufferedReader br;
 		Scanner scanner;
-		ArrayList<InputFileConfig> ifc = new ArrayList<>();
+		ArrayList<InputFileConfig> ifc;
 		
 		//Read parameter files (.param) and layout files (.lay) and create input files (.in)
 		for(Map.Entry<String, Integer> e: configs.entrySet()) {
-			br = new BufferedReader(new FileReader(new File(workingDir + e.getKey() + ".csv")));	
-	        
+			br = new BufferedReader(new FileReader(new File(simDir + e.getKey() + ".csv")));	
+	        ifc = new ArrayList<>();
 	        //Read parameter file as csv line by line     
 			String line = null;
 
@@ -96,8 +101,7 @@ public class GprMaxAutoSim implements ThreadListener, Constants{
 			br.close();
 			
 			//Dispatch thread to create input files
-			Thread t = new Thread(new InputFileCreator(e.getKey(), ifc, this));
-			t.setName(e.getKey());
+			Thread t = new InputFileCreator(e.getKey(), ifc, this);
 			inputFileCreators.add(t);
 			t.start();
 		}
