@@ -10,13 +10,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class InputFileCreator implements Runnable, ThreadListener, Constants{
+public class InputFileCreator extends Thread implements ThreadListener, Constants{
 	private ThreadListener owner;
 	private ArrayList<Thread> bScanExecuters;
 	private ArrayList<InputFileConfig> configs;
 	private String filename;
 	
 	public InputFileCreator(String filename, ArrayList<InputFileConfig> configs, ThreadListener owner) {
+		super("InputFileCreator: " + filename);
 		this.owner = owner;
 		bScanExecuters = new ArrayList<>();
 		this.configs = configs;
@@ -31,18 +32,18 @@ public class InputFileCreator implements Runnable, ThreadListener, Constants{
 
 	@Override
 	public void run() {
-		//Create new directory to store files in (<filename>_yyyy-MM-dd_HH-mm)
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm");
-		File dir = new File(workingDir + filename + "_" + sdf.format(new Date()));	
+		//Create new directory to store files in (<filename>_yyyy-MM-dd_HH-mm-ss)
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+		File dir = new File(simDir + filename + "_" + sdf.format(new Date()));	
 		
-		if(dir.mkdir()) {
+		if(!dir.exists() && dir.mkdir()) {
 			try {
 				//Create input files for each config
 				int seq = 0;
 				
 				for(InputFileConfig c : configs) {	
 					String genFileName = filename + "_" + seq++ +"SEQ";
-					BufferedReader br = new BufferedReader(new FileReader(workingDir + filename + ".templ"));
+					BufferedReader br = new BufferedReader(new FileReader(simDir + filename + ".templ"));
 					BufferedWriter wr = new BufferedWriter(new FileWriter(dir.getPath() + "/" + genFileName + ".in"));
 			        
 					//Copy template		
@@ -61,8 +62,7 @@ public class InputFileCreator implements Runnable, ThreadListener, Constants{
 			        wr.close();
 			        
 			        //Execute BScan
-			        Thread t = new Thread(new BScanExecuter(dir, genFileName, c.getIterations(), this));
-			        t.setName(genFileName);
+			        Thread t = new BScanExecuter(dir, genFileName, c.getIterations(), this);
 			        bScanExecuters.add(t);
 			        t.start();			       			        
 				}
