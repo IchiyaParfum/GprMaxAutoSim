@@ -2,110 +2,49 @@ package autoSim;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import javax.xml.parsers.ParserConfigurationException;
 
-public class GprMaxAutoSim implements ThreadListener, Constants{
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+public class GprMaxAutoSim implements ThreadListener{
 	private ArrayList<Thread> inputFileCreators;
-	private HashMap<String, Integer> configs;
 	
 	public GprMaxAutoSim(){
-		configs = new HashMap<>();
-		inputFileCreators = new ArrayList<>();
 		
+		inputFileCreators = new ArrayList<>();	
 		try {
-			readFilenamesFromConfig();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			createInputFileCreators();
-		} catch (InvalidParameterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
+			deployInputFileCreators();
+		} catch (IOException | ParserConfigurationException | SAXException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	private void readFilenamesFromConfig() throws IOException{
-		File file = new File(simDir + configFile); 
-		if(file.exists()) {
-			BufferedReader br = new BufferedReader(new FileReader(file));
-			
-			
-			//Read filenames from file
-			String st;
-
-			while ((st = br.readLine()) != null) {
-				if(st.matches("\\w+\\s+\\d+")) {
-					//Setup scanner
-					Scanner scanner = new Scanner(st);	
-					scanner.useDelimiter(" ");
-					
-					//Ensure that name only exists once
-					String name = scanner.next();
-					if(!configs.containsKey(name)) {
-						configs.put(name, scanner.nextInt());
-					}
-					scanner.close();
-				}				
+	private void deployInputFileCreators() throws IOException, ParserConfigurationException, SAXException{
+		File f = new File(AppProperties.runFile);
+		if(f.exists()) {
+			BufferedReader br = new BufferedReader(new FileReader(f));
+			String filename;
+			//Read simulations
+			while((filename = br.readLine()) != null) {
+				if(!inputFileCreators.contains(filename)) {
+					//Dispatch thread to create input files
+					Thread t = new InputFileCreator(filename, this);				
+					inputFileCreators.add(t);
+					t.start();
+				}
 			}
-			
-			br.close();
 		}else {
-			throw new IOException("There has to be a config file at: " + file.getAbsolutePath());
+			throw new IOException("There has to be a config file at location: " + f.getAbsolutePath());
 		}
-		
-	}	
-	
-	private void createInputFileCreators() throws InvalidParameterException, IOException{
-		BufferedReader br;
-		Scanner scanner;
-		ArrayList<InputFileConfig> ifc;
-		
-		//Read parameter files (.param) and layout files (.lay) and create input files (.in)
-		for(Map.Entry<String, Integer> e: configs.entrySet()) {
-			br = new BufferedReader(new FileReader(new File(simDir + e.getKey() + ".csv")));	
-	        ifc = new ArrayList<>();
-	        //Read parameter file as csv line by line     
-			String line = null;
-
-			while ((line = br.readLine()) != null) {
-				//Read if not a comment
-				if(!line.startsWith("#")) {
-					//Setup scanner
-					scanner = new Scanner(line);
-					scanner.useDelimiter("\\s*\\,\\s*");
-					
-					double[] params = new double[InputFileConfig.nOfParam];
-					int i = 0;
-					
-					while (scanner.hasNext()) {
-						if(i < params.length) {
-							params[i++] = scanner.nextDouble();
-						}else {
-							throw new InvalidParameterException();
-						}
-					}
-					ifc.add(new InputFileConfig(e.getValue(), params));
-					scanner.close();
-				}		
-			}
-			br.close();
-			
-			//Dispatch thread to create input files
-			Thread t = new InputFileCreator(e.getKey(), ifc, this);
-			inputFileCreators.add(t);
-			t.start();
-		}
-	}		
+	}
 			
 	
 	@Override
