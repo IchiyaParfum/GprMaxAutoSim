@@ -46,7 +46,7 @@ public class InputFileCreator extends Thread implements ThreadListener, Constant
 				String material = new String();
 				
 				//Read general settings	
-				XmlReader2 xml = new XmlReader2(new File(AppProperties.simDir + "\\" + filename + ".sim"));		
+				XmlReader xml = new XmlReader(new File(AppProperties.simDir + "\\" + filename + ".sim"));		
 				NodeList nodes = xml.getNodeList("iterations");
 				System.out.println(nodes.getLength());
 				if(nodes != null) {
