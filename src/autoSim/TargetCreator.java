@@ -74,6 +74,6 @@ public class TargetCreator {
 	}
 	
 	public String getGeometryView(String filename) {
-		return "#geometry-view: 0 0 0 1 1 0.003 0.003 0.003 0.003 " + filename + " n";
+		return "#geometry_view: 0 0 0 1 1 0.003 0.003 0.003 0.003 " + filename + " n";
 	}
 }
