@@ -1,0 +1,11 @@
+GENERAL SETTINGS
+#domain: 1.0 1.0 0.003
+#dx_dy_dz: 0.003 0.003 0.003
+#time_window: 15e-9
+
+ANTENNA SETTINGS
+#waveform: ricker 30 1.5e9 my_ricker
+#hertzian_dipole: z 0.250 0.300 0 my_ricker
+#rx: 0.750 0.300 0
+#src_steps: 0.003 0 0
+#rx_steps: 0 0 0
