@@ -1,0 +1,19 @@
+MATERIAL FILE CONTAINING STANDARD MATERIALS
+
+relPermit conduct relPermeab magnLoss id
+#material: 1 0 1 0 air
+#material: 60 0 1 0 water
+#material: 2 0 1 0 wood_dry
+#material: 3 0 1 0 rubber
+#material: 2.7 0 1 0 soil_dry
+#material: 8 0 1 0 glass
+#material: 1 0 1 0 copper
+#material: 1 0 5000 0 iron
+#material: 1 0 300 0 nickel
+#material: 5 0 1 0 concrete_dry
+#material: 60 0 1 0 highPermittivity
+#material: 25 0 1 0 mediumPermittivity
+#material: 5 0 1 0 lowPermittivity
+#material: 5 10 1 10 highLoss
+#material: 5 5 1 5 mediumLoss
+#material: 5 0 1 0 lowLoss
